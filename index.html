@@ -5,98 +5,99 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sudoku Master</title>
   <style>
-  :root {
-   --bg: #0c0c0d;              /* Very dark background */
-   --fg: #d9d9d9;              /* Light gray text */
-   --accent: #794333;          /* Green accent */
-   --block1: #121214;          /* Slightly lighter black for blocks */
-   --block2: #1a1a1b;          /* Another subtle dark block color */
-   --input-bg: #18181a;        /* Input backgrounds */
-   --input-border: #3232bd;    /* Input border color */
-   --input-focus-bg: #121d5f;  /* Input focus background (green) */
-   --input-focus-color: #000000; 
-}
+    :root {
+      --bg: #0c0c0d;              /* Very dark background */
+      --fg: #d9d9d9;              /* Light gray text */
+      --accent: #794333;          /* Green accent */
+      --block1: #121214;          /* Slightly lighter black for blocks */
+      --block2: #1a1a1b;          /* Another subtle dark block color */
+      --input-bg: #18181a;        /* Input backgrounds */
+      --input-border: #3232bd;    /* Input border color */
+      --input-focus-bg: #121d5f;  /* Input focus background (green) */
+      --input-focus-color: #000000; 
+    }
 
-body {
-  background: var(--bg);
-  color: var(--fg);
-  font-family: 'Segoe UI', sans-serif;
-  margin: 0;
-  padding: 20px;
-  text-align: center;
-}
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
 
-h1 {
-  color: var(--accent);
-}
+    h1 {
+      color: var(--accent);
+    }
 
-select, button {
-  background: var(--input-bg);
-  color: var(--fg);
-  border: none;
-  padding: 10px;
-  margin: 5px;
-  border-radius: 5px;
-  font-size: 1rem;
-}
+    select, button {
+      background: var(--input-bg);
+      color: var(--fg);
+      border: none;
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      font-size: 1rem;
+    }
 
-#board {
-  display: grid;
-  margin: 20px auto;
-  gap: 2px;
-  max-width: 100vw;
-  width: 100%;
-  justify-content: center;
-}
+    #board {
+      display: grid;
+      margin: 20px auto;
+      gap: 2px;
+      max-width: 100vw;
+      width: 100%;
+      justify-content: center;
+    }
 
-#board.size-9 {
-  grid-template-columns: repeat(9, 1fr);
-}
+    #board.size-9 {
+      grid-template-columns: repeat(9, 1fr);
+    }
 
-#board.size-12 {
-  grid-template-columns: repeat(12, 1fr);
-}
+    #board.size-12 {
+      grid-template-columns: repeat(12, 1fr);
+    }
 
-#board.size-16 {
-  grid-template-columns: repeat(16, 1fr);
-}
+    #board.size-16 {
+      grid-template-columns: repeat(16, 1fr);
+    }
 
-input.cell {
-  width: 100%;
-  height: auto;
-  aspect-ratio: 1 / 1; /* Keep cells square */
-  font-size: calc(10px + 0.8vw);
-  text-align: center;
-  background: var(--input-bg);
-  color: var(--fg);
-  border: 1px solid #444;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
+    input.cell {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1 / 1; /* keep cells square */
+      font-size: calc(10px + 0.8vw);
+      text-align: center;
+      background: var(--input-bg);
+      color: var(--fg);
+      border-style: solid;
+      border-color: #444;
+      border-width: 1px;
+      border-radius: 0;
+      box-sizing: border-box;
+    }
 
-input.cell[disabled] {
-  color: #999;
-}
+    input.cell[disabled] {
+      color: #999;
+    }
 
-.cell[data-block="even"] {
-  background: var(--block1);
-}
+    .cell[data-block="even"] {
+      background: var(--block1);
+    }
 
-.cell[data-block="odd"] {
-  background: var(--block2);
-}
+    .cell[data-block="odd"] {
+      background: var(--block2);
+    }
 
-@media (max-width: 600px) {
-  input.cell {
-    font-size: calc(8px + 1vw);
-  }
-}
+    @media (max-width: 600px) {
+      input.cell {
+        font-size: calc(8px + 1vw);
+      }
+    }
 
-#message {
-  margin-top: 10px;
-  font-weight: bold;
-}
-
+    #message {
+      margin-top: 10px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -257,6 +258,37 @@ input.cell[disabled] {
       }
     }
 
+    function updateBlockBorders() {
+      const [blockR, blockC] = blockSize;
+      document.querySelectorAll('input.cell').forEach(cell => {
+        const r = parseInt(cell.dataset.r);
+        const c = parseInt(cell.dataset.c);
+
+        // Reset all borders to normal
+        cell.style.borderTopWidth = '1px';
+        cell.style.borderLeftWidth = '1px';
+        cell.style.borderRightWidth = '1px';
+        cell.style.borderBottomWidth = '1px';
+
+        // Thicker right border if last column of block (except last overall col)
+        if ((c + 1) % blockC === 0 && c !== boardSize - 1) {
+          cell.style.borderRightWidth = '3px';
+        }
+        // Thicker bottom border if last row of block (except last overall row)
+        if ((r + 1) % blockR === 0 && r !== boardSize - 1) {
+          cell.style.borderBottomWidth = '3px';
+        }
+        // Thicker top border for first row
+        if (r === 0) {
+          cell.style.borderTopWidth = '3px';
+        }
+        // Thicker left border for first column
+        if (c === 0) {
+          cell.style.borderLeftWidth = '3px';
+        }
+      });
+    }
+
     function generate() {
       messageEl.textContent = "";
       boardSize = parseInt(sizeEl.value);
@@ -264,48 +296,50 @@ input.cell[disabled] {
 
       if (modeEl.value === "solve") {
         board = Array.from({ length: boardSize }, () => Array(boardSize).fill(0));
-        renderBoard();
-        return;
+      } else {
+        board = generateFullBoard();
+        removeCells(board, diffEl.value);
       }
 
-      board = generateFullBoard();
-      removeCells(board, diffEl.value);
       renderBoard();
+      updateBlockBorders();
+    }
+
+    function check() {
+      const userBoard = getUserBoard();
+      for (let r = 0; r < boardSize; r++) {
+        for (let c = 0; c < boardSize; c++) {
+          const val = userBoard[r][c];
+          if (val === 0) {
+            messageEl.textContent = "Incomplete: some cells are empty.";
+            return;
+          }
+          // Temporarily clear the cell to test validity
+          userBoard[r][c] = 0;
+          if (!isValid(userBoard, r, c, val)) {
+            messageEl.textContent = `Invalid entry at row ${r+1} column ${c+1}`;
+            userBoard[r][c] = val;
+            return;
+          }
+          userBoard[r][c] = val;
+        }
+      }
+      messageEl.textContent = "Congratulations! The board is valid.";
     }
 
     function solve() {
       const userBoard = getUserBoard();
-      const clone = JSON.parse(JSON.stringify(userBoard));
-      if (solveBoard(clone)) {
-        board = clone;
-        renderBoard();
-        messageEl.textContent = "✅ Solved!";
-      } else {
-        messageEl.textContent = "❌ Unsolvable board.";
+      if (!solveBoard(userBoard)) {
+        messageEl.textContent = "No solution found.";
+        return;
       }
+      board = userBoard;
+      renderBoard();
+      updateBlockBorders();
+      messageEl.textContent = "Solved!";
     }
 
-    function check() {
-      const g = getUserBoard();
-      for (let r = 0; r < boardSize; r++) {
-        for (let c = 0; c < boardSize; c++) {
-          const val = g[r][c];
-          if (val !== 0) {
-            g[r][c] = 0;
-            if (!isValid(g, r, c, val)) {
-              messageEl.textContent = `❌ Wrong value at row ${r + 1}, col ${c + 1}`;
-              return;
-            }
-            g[r][c] = val;
-          }
-        }
-      }
-      messageEl.textContent = "✅ Looks good!";
-    }
-
-    window.onload = () => {
-      generate();
-    };
+    generate();
   </script>
 </body>
 </html>
