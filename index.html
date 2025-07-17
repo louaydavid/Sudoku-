@@ -6,33 +6,28 @@
   <title>Sudoku Master</title>
   <style>
     :root {
-     --bg: #121214;
-      --fg: #f0f0f0;
-      --accent: #d67f34;
-      --block1: #2a2a2e;  /* subtle dark gray */
-      --block2: #3b3b42;  /* slightly lighter */
-      --input-bg: #1e1e22;
-      --input-border: #5a5a70;
-      --input-focus-bg: #444466;
-      --input-focus-color: #fff;
-      --border-color: #a5a5ad;
+      --bg: #0c0c0d;
+      --fg: #d9d9d9;
+      --accent: #794333;
+      --block1: #222222;
+      --block2: #444444;
+      --input-bg: #18181a;
+      --input-border: #3232bd;
+      --input-focus-bg: #121d5f;
+      --input-focus-color: #ffffff;
     }
 
     body {
       background: var(--bg);
       color: var(--fg);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       margin: 0;
       padding: 20px;
       text-align: center;
-      user-select: none;
     }
 
     h1 {
       color: var(--accent);
-      font-weight: 700;
-      margin-bottom: 10px;
-      user-select: text;
     }
 
     #controls {
@@ -42,32 +37,21 @@
     select, button {
       background: var(--input-bg);
       color: var(--fg);
-      border: 1.5px solid var(--input-border);
-      padding: 12px 15px;
-      margin: 5px 6px;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-weight: 600;
+      border: none;
+      padding: 10px;
+      margin: 5px 3px;
+      border-radius: 5px;
+      font-size: 1rem;
       cursor: pointer;
-      transition: background-color 0.3s ease, border-color 0.3s ease;
-      user-select: none;
-    }
-
-    select:hover, button:hover {
-      background-color: var(--input-focus-bg);
-      border-color: var(--accent);
-      color: var(--accent);
     }
 
     #board {
       display: grid;
       margin: 20px auto;
       gap: 0;
-      max-width: 100vw;
       width: 100%;
       max-width: 480px;
       justify-content: center;
-      user-select: text;
     }
 
     #board.size-9 {
@@ -83,36 +67,28 @@
     input.cell {
       width: 100%;
       aspect-ratio: 1 / 1;
-      font-size: calc(20px + 0.8vw);
-      font-weight: 700;
+      font-size: calc(12px + 0.8vw);
+      font-weight: bold;
       text-align: center;
       background: var(--input-bg);
-      color: var(--fg);
+      color: white; /* White numbers */
       border: none;
       box-sizing: border-box;
       user-select: text;
       outline-offset: -2px;
-      transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-      border-radius: 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
     }
 
     input.cell:focus {
       background: var(--input-focus-bg);
-      color: var(--input-focus-color);
-      outline: 2.5px solid var(--accent);
-      box-shadow: 0 0 8px var(--accent);
+      color: white;
+      outline: 2px solid var(--input-border);
     }
 
     input.cell[disabled] {
-      color: #999;
+      color: white; /* White pre-filled numbers */
       background: var(--input-bg);
-      font-weight: 600;
-      cursor: default;
     }
 
-    /* Softer block backgrounds with subtle difference */
     .cell[data-block="even"] {
       background-color: var(--block1);
     }
@@ -123,14 +99,13 @@
 
     @media (max-width: 600px) {
       input.cell {
-        font-size: calc(18px + 1vw);
+        font-size: calc(10px + 1vw);
       }
       select, button {
-        padding: 10px 12px;
-        font-size: 1rem;
+        padding: 8px;
+        font-size: 0.9rem;
       }
     }
-
   </style>
 </head>
 <body>
@@ -157,7 +132,7 @@
   </div>
 
   <div id="board" class="size-9"></div>
-  <div id="message" style="margin-top: 12px; font-weight: 600; font-size: 1.1rem;"></div>
+  <div id="message"></div>
 
   <script>
     let boardSize = 9;
@@ -177,7 +152,7 @@
     }
 
     function toChar(n) {
-      return n <= 9 ? n.toString() : String.fromCharCode(55 + n); // A=10, B=11, C=12...
+      return n <= 9 ? n.toString() : String.fromCharCode(55 + n);
     }
 
     function fromChar(ch) {
@@ -220,29 +195,15 @@
       document.querySelectorAll('input.cell').forEach(cell => {
         const r = parseInt(cell.dataset.r);
         const c = parseInt(cell.dataset.c);
-
-        // Reset borders
         cell.style.borderTop = '0';
         cell.style.borderLeft = '0';
         cell.style.borderRight = '0';
         cell.style.borderBottom = '0';
 
-        // Softer borders for block edges
-        const borderWidth = '2.5px';
-        const borderColor = 'var(--border-color)';
-
-        if (r % blockR === 0) {
-          cell.style.borderTop = `${borderWidth} solid ${borderColor}`;
-        }
-        if (c % blockC === 0) {
-          cell.style.borderLeft = `${borderWidth} solid ${borderColor}`;
-        }
-        if ((c + 1) % blockC === 0 || c === boardSize - 1) {
-          cell.style.borderRight = `${borderWidth} solid ${borderColor}`;
-        }
-        if ((r + 1) % blockR === 0 || r === boardSize - 1) {
-          cell.style.borderBottom = `${borderWidth} solid ${borderColor}`;
-        }
+        if (r % blockR === 0) cell.style.borderTop = '3px solid black';
+        if (c % blockC === 0) cell.style.borderLeft = '3px solid black';
+        if ((c + 1) % blockC === 0 || c === boardSize - 1) cell.style.borderRight = '3px solid black';
+        if ((r + 1) % blockR === 0 || r === boardSize - 1) cell.style.borderBottom = '3px solid black';
       });
     }
 
@@ -350,14 +311,14 @@
           }
           userBoard[r][c] = 0;
           if (!isValid(userBoard, r, c, val)) {
-            messageEl.textContent = `Invalid entry at row ${r+1}, column ${c+1}`;
+            messageEl.textContent = `Invalid entry at row ${r+1} column ${c+1}`;
             userBoard[r][c] = val;
             return;
           }
           userBoard[r][c] = val;
         }
       }
-      messageEl.textContent = "🎉 Congratulations! The board is valid.";
+      messageEl.textContent = "Congratulations! The board is valid.";
     }
 
     function solve() {
