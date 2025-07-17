@@ -2,19 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Sudoku Master</title>
   <style>
     :root {
-      --bg: #0c0c0d;              /* Very dark background */
-      --fg: #d9d9d9;              /* Light gray text */
-      --accent: #794333;          /* Green accent */
-      --block1: #121214;          /* Slightly lighter black for blocks */
-      --block2: #1a1a1b;          /* Another subtle dark block color */
-      --input-bg: #18181a;        /* Input backgrounds */
-      --input-border: #3232bd;    /* Input border color */
-      --input-focus-bg: #121d5f;  /* Input focus background (green) */
-      --input-focus-color: #000000; 
+      --bg: #0c0c0d;
+      --fg: #d9d9d9;
+      --accent: #794333;
+      --block1: #222222;  /* Dark gray */
+      --block2: #444444;  /* Medium dark gray */
+      --input-bg: #18181a;
+      --input-border: #3232bd;
+      --input-focus-bg: #121d5f;
+      --input-focus-color: #000000;
     }
 
     body {
@@ -30,74 +30,84 @@
       color: var(--accent);
     }
 
+    #controls {
+      margin-bottom: 15px;
+    }
+
     select, button {
       background: var(--input-bg);
       color: var(--fg);
       border: none;
       padding: 10px;
-      margin: 5px;
+      margin: 5px 3px;
       border-radius: 5px;
       font-size: 1rem;
+      cursor: pointer;
     }
 
     #board {
       display: grid;
       margin: 20px auto;
-      gap: 2px;
+      gap: 0; /* no gap so borders form continuous lines */
       max-width: 100vw;
       width: 100%;
+      max-width: 480px; /* limit max width for large screens */
       justify-content: center;
     }
 
     #board.size-9 {
       grid-template-columns: repeat(9, 1fr);
     }
-
     #board.size-12 {
       grid-template-columns: repeat(12, 1fr);
     }
-
     #board.size-16 {
       grid-template-columns: repeat(16, 1fr);
     }
 
     input.cell {
       width: 100%;
-      height: auto;
-      aspect-ratio: 1 / 1; /* keep cells square */
+      aspect-ratio: 1 / 1;
       font-size: calc(10px + 0.8vw);
       text-align: center;
       background: var(--input-bg);
       color: var(--fg);
-      border-style: solid;
-      border-color: #444;
-      border-width: 1px;
-      border-radius: 0;
+      border: none; /* remove default border, we add custom borders */
       box-sizing: border-box;
+      user-select: text;
+      outline-offset: -2px;
+    }
+
+    input.cell:focus {
+      background: var(--input-focus-bg);
+      color: var(--input-focus-color);
+      outline: 2px solid var(--input-border);
     }
 
     input.cell[disabled] {
       color: #999;
+      background: var(--input-bg);
     }
 
+    /* Clear contrasting block backgrounds */
     .cell[data-block="even"] {
-      background: var(--block1);
+      background-color: var(--block1);
     }
 
     .cell[data-block="odd"] {
-      background: var(--block2);
+      background-color: var(--block2);
     }
 
     @media (max-width: 600px) {
       input.cell {
         font-size: calc(8px + 1vw);
       }
+      select, button {
+        padding: 8px;
+        font-size: 0.9rem;
+      }
     }
 
-    #message {
-      margin-top: 10px;
-      font-weight: bold;
-    }
   </style>
 </head>
 <body>
@@ -122,6 +132,7 @@
     <button onclick="solve()">Solve</button>
     <button onclick="clearBoard()">Clear</button>
   </div>
+
   <div id="board" class="size-9"></div>
   <div id="message"></div>
 
@@ -178,6 +189,35 @@
           boardEl.appendChild(input);
         }
       }
+      updateBlockBorders();
+    }
+
+    function updateBlockBorders() {
+      const [blockR, blockC] = blockSize;
+      document.querySelectorAll('input.cell').forEach(cell => {
+        const r = parseInt(cell.dataset.r);
+        const c = parseInt(cell.dataset.c);
+
+        // Reset borders
+        cell.style.borderTop = '0';
+        cell.style.borderLeft = '0';
+        cell.style.borderRight = '0';
+        cell.style.borderBottom = '0';
+
+        // Bold black borders around block edges
+        if (r % blockR === 0) {
+          cell.style.borderTop = '3px solid black';
+        }
+        if (c % blockC === 0) {
+          cell.style.borderLeft = '3px solid black';
+        }
+        if ((c + 1) % blockC === 0 || c === boardSize - 1) {
+          cell.style.borderRight = '3px solid black';
+        }
+        if ((r + 1) % blockR === 0 || r === boardSize - 1) {
+          cell.style.borderBottom = '3px solid black';
+        }
+      });
     }
 
     function clearBoard() {
@@ -234,7 +274,7 @@
 
     function generateFullBoard() {
       const grid = Array.from({ length: boardSize }, () => Array(boardSize).fill(0));
-      solveBoard(grid); // start with full valid board
+      solveBoard(grid); // generate a full valid board
       return grid;
     }
 
@@ -258,37 +298,6 @@
       }
     }
 
-    function updateBlockBorders() {
-      const [blockR, blockC] = blockSize;
-      document.querySelectorAll('input.cell').forEach(cell => {
-        const r = parseInt(cell.dataset.r);
-        const c = parseInt(cell.dataset.c);
-
-        // Reset all borders to normal
-        cell.style.borderTopWidth = '1px';
-        cell.style.borderLeftWidth = '1px';
-        cell.style.borderRightWidth = '1px';
-        cell.style.borderBottomWidth = '1px';
-
-        // Thicker right border if last column of block (except last overall col)
-        if ((c + 1) % blockC === 0 && c !== boardSize - 1) {
-          cell.style.borderRightWidth = '3px';
-        }
-        // Thicker bottom border if last row of block (except last overall row)
-        if ((r + 1) % blockR === 0 && r !== boardSize - 1) {
-          cell.style.borderBottomWidth = '3px';
-        }
-        // Thicker top border for first row
-        if (r === 0) {
-          cell.style.borderTopWidth = '3px';
-        }
-        // Thicker left border for first column
-        if (c === 0) {
-          cell.style.borderLeftWidth = '3px';
-        }
-      });
-    }
-
     function generate() {
       messageEl.textContent = "";
       boardSize = parseInt(sizeEl.value);
@@ -302,7 +311,6 @@
       }
 
       renderBoard();
-      updateBlockBorders();
     }
 
     function check() {
@@ -335,11 +343,12 @@
       }
       board = userBoard;
       renderBoard();
-      updateBlockBorders();
       messageEl.textContent = "Solved!";
     }
 
-    generate();
+    window.onload = () => {
+      generate();
+    };
   </script>
 </body>
 </html>
